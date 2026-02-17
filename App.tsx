@@ -1,20 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { AppNavigator } from "./src/navigation/AppNavigator";
+import { ProjectsProvider, useProjects } from "./src/store/ProjectsContext";
+
+function Bootstrap() {
+    const { fetchProjects } = useProjects();
+    useEffect(() => {
+      fetchProjects();
+    }, []);
+    return <AppNavigator />;
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ProjectsProvider>
+      <NavigationContainer>
+        <Bootstrap />
+      </NavigationContainer>
+    </ProjectsProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

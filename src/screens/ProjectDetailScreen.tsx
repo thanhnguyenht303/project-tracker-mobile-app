@@ -193,7 +193,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                 />
             </View>
             ) : (
-            !!project.description && <Text style={{ lineHeight: 20 }}>{project.description}</Text>
+                !!project.description && <Text style={{ lineHeight: 20 }}>{project.description}</Text>
             )}
 
             {/* Status update buttons (still available, but disable during edit to avoid conflicts) */}

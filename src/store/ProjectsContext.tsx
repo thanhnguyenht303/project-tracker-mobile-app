@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useReducer } from "react";
 import { Alert } from "react-native";
 import { projectsApi } from "../services/projectsApi";
-import { Project, ProjectStatus, ProjectUpdate } from "../types/project";
+import { Project, ProjectCreateInput, ProjectStatus, ProjectUpdate } from "../types/project";
 
 type State = {
   projects: Project[];
@@ -16,6 +16,7 @@ type Ctx = State & {
     updateStatus: (id: string, status: ProjectStatus) => Promise<void>;
     getById: (id: string) => Project | undefined;
     updateProjectFields: (id: string, patch: ProjectUpdate) => Promise<void>;
+    createProject: (input: ProjectCreateInput) => Promise<Project>;
 };
 
 const ProjectsContext = createContext<Ctx | null>(null);
@@ -28,7 +29,8 @@ type Action =
 { type: "UPDATE_CONFIRMED"; updated: Project } |
 { type: "UPDATE_ROLLBACK"; prev: Project[] } |
 { type: "UPDATE_DONE" } | 
-{ type: "MERGE_OPTIMISTIC"; id: string; patch: ProjectUpdate };
+{ type: "MERGE_OPTIMISTIC"; id: string; patch: ProjectUpdate } |
+{ type: "CREATE_OPTIMISTIC"; project: Project};
 
 
 const initial: State = {
@@ -76,6 +78,12 @@ function reducer(state: State, action: Action): State {
             p.id === action.id ? { ...p, ...action.patch } : p
             ),
         };
+    case "CREATE_OPTIMISTIC":
+        return {
+            ...state,
+            updatingId: action.project.id,
+            projects: [action.project, ...state.projects],
+        }
     default:
         return state;
   }
@@ -123,11 +131,41 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
             dispatch({ type: "UPDATE_ROLLBACK", prev });
             Alert.alert("Save failed", e?.message ?? "Unknown error");
         }
+    };
+    
+    const createProject: Ctx["createProject"] = async (input) => {
+        const prev = state.projects;
+
+        const id = "p_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+
+        const optimistic: Project = {
+            id,
+            name: input.name,
+            clientName: input.clientName,
+            status: "active",
+            startDate: input.startDate,
+            endDate: input.endDate,
+            description: input.description,
         };
+
+        dispatch({ type: "CREATE_OPTIMISTIC", project: optimistic});
+
+        try {
+            const created = await projectsApi.createProject({...input, id});
+            dispatch({type: "UPDATE_CONFIRMED", updated: created});
+            dispatch({type: "UPDATE_DONE"});
+            return created;
+        } catch (e: any) {
+            dispatch({type: "UPDATE_ROLLBACK", prev});
+            Alert.alert("Created failed", e?.message ?? "Unknown error");
+            throw e;
+        }
+
+    }
 
 
     const value: Ctx = useMemo(
-        () => ({ ...state, fetchProjects, updateStatus, getById, updateProjectFields }),
+        () => ({ ...state, fetchProjects, updateStatus, getById, updateProjectFields, createProject }),
         [state]
     );
 

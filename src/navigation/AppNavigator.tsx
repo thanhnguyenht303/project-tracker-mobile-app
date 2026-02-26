@@ -2,10 +2,12 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ProjectListScreen } from "../screens/ProjectListScreen";
 import { ProjectDetailScreen } from "../screens/ProjectDetailScreen";
+import { CreateProjectScreen } from "../screens/CreateProjectScreen";
 
 export type RootStackParamList = {
     Projects: undefined;
     ProjectDetail: { projectId: string };
+    CreateProject: undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,6 +17,7 @@ export function AppNavigator() {
         <Stack.Navigator>
             <Stack.Screen name="Projects" component={ProjectListScreen} options={{ title: "Projects" }} />
             <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} options={{ title: "Project" }} />
+            <Stack.Screen name="CreateProject" component={CreateProjectScreen} />
         </Stack.Navigator>
     );
 }

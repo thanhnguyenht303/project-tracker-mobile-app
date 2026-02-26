@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { projectData } from "../data/projectData";
-import { Project, ProjectStatus, ProjectUpdate } from "../types/project";
+import { Project, ProjectCreateInput, ProjectStatus, ProjectUpdate } from "../types/project";
 
 const STORAGE_KEY = "@projects_v4";
 const NETWORK_DELAY_MS = 350;
@@ -27,6 +27,10 @@ function assertProjects(value: unknown): asserts value is Project[] {
         throw new Error("Invalid response: malformed project");
     }
   }
+}
+
+function isValidDate(v: string) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(v);
 }
 
 async function readAll(): Promise<Project[]> {
@@ -97,5 +101,39 @@ export const projectsApi = {
         await writeAll(next);
         return updated;
     },
+
+    async createProject(input: ProjectCreateInput & {id: string}): Promise<Project> {
+        await delay(NETWORK_DELAY_MS);
+        if(SIMULATE_ERROR) throw new Error("Network error");
+
+        const name = input.name.trim();
+        const clientName = input.clientName.trim();
+        const startDate = input.startDate.trim();
+        const endDate = (input.endDate ?? "").trim();
+        const description = (input.description ?? "").trim();
+
+        if(!name) throw new Error("Name is required!");
+        if(!clientName) throw new Error("Client name is required!");
+        if(!startDate) throw new Error("Start date is required!");
+        if(!isValidDate(startDate)) throw new Error("Start date must be YYYY-MM-DD");
+        if(endDate && !isValidDate(endDate)) throw new Error("End date must be YYYY-MM-DD (or empty)");
+        if(endDate && endDate < startDate) throw new Error("End date cannot be earlier than start date");
+
+        const projects = await readAll();
+        if(projects.some((p) => p.id === input.id)) throw new Error("ID already exists");
+        const created: Project = {
+            id: input.id,
+            name, 
+            clientName,
+            status: "active",
+            startDate,
+            endDate: endDate ? endDate : undefined,
+            description: description ? description : undefined,
+        };
+
+        const next = [created, ...projects];
+        await writeAll(next);
+        return created;
+    }
 
 };

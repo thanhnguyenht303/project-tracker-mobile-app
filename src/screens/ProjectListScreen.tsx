@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -30,6 +30,19 @@ export function ProjectListScreen({ navigation }: Props) {
         return matchesStatus && matchesQuery;
         });
     }, [projects, status, q]);
+
+        useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable
+                    onPress={() => navigation.navigate("CreateProject")}
+                    style={{paddingHorizontal: 10, paddingVertical: 6}}
+                >
+                    <Text style={{fontSize: 30, fontWeight: "700"}}>+</Text>
+                </Pressable>
+            )
+        })
+    }, [navigation])
 
     if (loading) {
         return (

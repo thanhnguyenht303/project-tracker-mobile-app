@@ -10,6 +10,14 @@ export type Project = {
   description?: string;
 };
 
+export type ProjectCreateInput = {
+  name: string;
+  clientName: string;
+  startDate: string;
+  endDate?: string;
+  description?: string;
+}
+
 export const STATUS_LABEL: Record<ProjectStatus | "all", string> = {
   all: "All",
   active: "Active",

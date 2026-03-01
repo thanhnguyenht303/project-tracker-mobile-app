@@ -4,9 +4,11 @@ import { AppNavigator } from "./src/navigation/AppNavigator";
 import { ProjectsProvider, useProjects } from "./src/store/ProjectsContext";
 
 function Bootstrap() {
-    const { fetchProjects } = useProjects();
+    const { fetchProjects, loadFavorites, loadRecent } = useProjects();
     useEffect(() => {
       fetchProjects();
+      loadFavorites();
+      loadRecent();
     }, []);
     return <AppNavigator />;
 }

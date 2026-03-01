@@ -9,19 +9,29 @@ Focus: clean architecture, correct async data flow, and reliable state handling 
 - Displays project name, client name, and status
 - Pull-to-refresh to re-fetch data
 - Long project names are handled with ellipsis to avoid layout breaks
+- Sort dropdown (Start date / Name / Status priority)
+- Active filter indicator (Status / Search / Sort + Results count) with **Clear** button
+- Favorite (★) projects to pin them to the top (persisted)
+- Recently viewed section shown above the list (persisted)
 
 ### Filters & Search
 - Filter by status (All / Active / On hold / Completed)
 - Search by project name or client name
 - Filters and search work together
-- Original dataset remains intact (filtered list is derived)
+- Original dataset remains intact (filtered list is derived, not mutated)
 
 ### Project Detail Screen
 - View project details
 - Update status (active / on_hold / completed)
-- Edit fields (name, clientName, startDate, endDate, description) using **Edit → Save** button in the header
+- Edit fields (name, clientName, startDate, endDate, description) using **Edit → Save** in the header
+- Cancel editing with a discard confirmation (unsaved changes are protected)
 - `id` is not editable, and `status` is only editable via the status buttons
 - Changes persist and update the list immediately
+
+### Create Project
+- Create a new project (defaults to **Active**)
+- Validation for required fields and date format (YYYY-MM-DD)
+- New projects persist and appear immediately in the list
 
 ### States & Edge Cases
 - Loading state
